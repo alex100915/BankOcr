@@ -12,5 +12,10 @@ List<OcrBankAccount> ocrBankAccounts = ocrBankAccountsReader.Read(fileLines);
 BankAccountParser bankAccountParser = new BankAccountParser();
 List<BankAccount> bankAccounts = bankAccountParser.ParseFromOcr(ocrBankAccounts);
 
-foreach (var bankAccount in bankAccounts)
+Console.WriteLine("Valid");
+foreach (var bankAccount in bankAccounts.Where(a => a.ValidChecksum == true))
+    Console.WriteLine(bankAccount.AccountNumber);
+
+Console.WriteLine("Invalid");
+foreach (var bankAccount in bankAccounts.Where(a => a.ValidChecksum == false))
     Console.WriteLine(bankAccount.AccountNumber);
