@@ -12,11 +12,11 @@ namespace BankOcr.Models
             set
             {
                 _accountNumber = value;
-                ValidChecksum = IsValidChecksum(_accountNumber);
+                Status = CheckStatus(_accountNumber);
             }
         }
 
-        public bool ValidChecksum { get; private set; }
+        public string Status { get; private set; }
 
         private bool IsValidChecksum(string accountNumber)
         {
@@ -38,6 +38,22 @@ namespace BankOcr.Models
             }
 
             return checkSum % BankAccountSettings.Checksum == 0;
+        }
+
+        private string CheckStatus(string accountNumber)
+        {            
+            if (accountNumber.Contains("?"))
+                return BankAccountStatus.Illegible;
+
+            if (!IsValidChecksum(accountNumber))
+                return BankAccountStatus.CheksumInvalid;
+
+            return string.Empty;
+        }
+
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(Status) ? AccountNumber : string.Join(" ", AccountNumber, Status);
         }
     }
 }

@@ -1,3 +1,4 @@
+using BankOcr.Constants;
 using BankOcr.Exceptions;
 using BankOcr.Models;
 
@@ -63,7 +64,7 @@ namespace BankOcr.Tests.Services
             };
 
             // Act & Assert
-            Assert.Throws<ParsingNumberException>(() => _parser.ParseFromOcr(ocrBankAccounts));
+            Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().AccountNumber, Does.Contain("?"));
         }
 
         [Test]

@@ -1,4 +1,5 @@
 ﻿using BankOcr.Models;
+using BankOcr.Constants;
 
 namespace BankOcr.Tests
 {
@@ -6,55 +7,64 @@ namespace BankOcr.Tests
     public class BankAccountTests
     {
         [Test]
-        public void AccountNumber_WithValidChecksum_SetsValidChecksumToTrue()
+        public void AccountNumber_WithValidChecksum_ShouldReturnEmptyStatus()
         {
             // Arrange
-            var bankAccount = new BankAccount();
+            var account = new BankAccount();
+            var validAccountNumber = "345882865"; // Example valid account number based on checksum logic
 
             // Act
-            bankAccount.AccountNumber = "123456789"; // Example of a valid account number
+            account.AccountNumber = validAccountNumber;
 
             // Assert
-            Assert.IsTrue(bankAccount.ValidChecksum);
+            Assert.That(account.AccountNumber, Is.EqualTo(validAccountNumber));
+            Assert.That(account.Status, Is.EqualTo(string.Empty));
         }
 
         [Test]
-        public void AccountNumber_WithInvalidChecksum_SetsValidChecksumToFalse()
+        public void AccountNumber_WithInvalidChecksum_ShouldReturnChecksumInvalidStatus()
         {
             // Arrange
-            var bankAccount = new BankAccount();
+            var account = new BankAccount();
+            var invalidAccountNumber = "123456289"; // Example invalid account number based on checksum logic
 
             // Act
-            bankAccount.AccountNumber = "123456780"; // Example of an invalid account number
+            account.AccountNumber = invalidAccountNumber;
 
             // Assert
-            Assert.IsFalse(bankAccount.ValidChecksum);
+            Assert.That(account.AccountNumber, Is.EqualTo(invalidAccountNumber));
+            Assert.That(account.Status, Is.EqualTo(BankAccountStatus.CheksumInvalid));
         }
 
         [Test]
-        public void AccountNumber_WithIncorrectLength_SetsValidChecksumToFalse()
+        public void AccountNumber_WithIllegibleCharacter_ShouldReturnIllegibleStatus()
         {
             // Arrange
-            var bankAccount = new BankAccount();
+            var account = new BankAccount();
+            var illegibleAccountNumber = "12345?789"; // Example account number with illegible character
 
             // Act
-            bankAccount.AccountNumber = "12345678"; // Example of an account number with incorrect length
+            account.AccountNumber = illegibleAccountNumber;
 
             // Assert
-            Assert.IsFalse(bankAccount.ValidChecksum);
+            Assert.That(account.AccountNumber, Is.EqualTo(illegibleAccountNumber));
+            Assert.That(account.Status, Is.EqualTo(BankAccountStatus.Illegible));
         }
 
         [Test]
-        public void AccountNumber_WithNonDigitCharacters_SetsValidChecksumToFalse()
+        public void AccountNumber_ToString_ShouldReturnAccountNumber()
         {
             // Arrange
-            var bankAccount = new BankAccount();
+            var account = new BankAccount();
+            var validAccountNumber = "123456789"; // Example of valid account number
+            account.AccountNumber = validAccountNumber;
+            var expectedOutput = $"{validAccountNumber}";
 
             // Act
-            bankAccount.AccountNumber = "12345678a"; // Example of an account number with non-digit characters
+            var output = account.ToString();
 
             // Assert
-            Assert.IsFalse(bankAccount.ValidChecksum);
+            Assert.That(output, Is.EqualTo(expectedOutput));
         }
     }
 }

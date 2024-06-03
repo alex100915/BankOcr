@@ -19,7 +19,7 @@ public class BankAccountParser
 
             foreach (var ocrNumber in ocrNumbers)
             {
-                accountNumber += ParseNumberFromOcr(ocrNumber, bankAccountsOcr.IndexOf(bankAccountOcr), ocrNumbers.IndexOf(ocrNumber));
+                accountNumber += ParseNumberFromOcr(ocrNumber);
             }
 
             bankAccount.AccountNumber = accountNumber;
@@ -59,17 +59,10 @@ public class BankAccountParser
         }
     }
 
-    private string ParseNumberFromOcr(string ocrNumber, int bankAccountNumber, int digitNumber)
+    private string ParseNumberFromOcr(string ocrNumber)
     {
         var number = OcrNumbers.OcrNumbersDictionary.FirstOrDefault(n => n.Key == ocrNumber);
 
-        if (number.Key == null)
-        {
-            throw new ParsingNumberException($"Number cannot be parsed:\n{ocrNumber.Insert(3, "\n").Insert(7, "\n")}" +
-                $"\nbank account position: {bankAccountNumber + 1}" +
-                $"\ndigit position: {digitNumber + 1}");
-        }
-
-        return number.Value.ToString();
+        return number.Key == null ? "?" : number.Value.ToString();
     }
 }
