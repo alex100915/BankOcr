@@ -1,6 +1,7 @@
 ﻿using BankOcr.Exceptions;
 using BankOcr.Constants;
 using BankOcr.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class BankAccountParser
 {
@@ -13,13 +14,15 @@ public class BankAccountParser
             BankAccount bankAccount = new BankAccount();
 
             var ocrNumbers = GetOcrNumbers(bankAccountOcr);
+            
+            string accountNumber = string.Empty;
 
             foreach (var ocrNumber in ocrNumbers)
             {
-                string number = ParseNumberFromOcr(ocrNumber, bankAccountsOcr.IndexOf(bankAccountOcr), ocrNumbers.IndexOf(ocrNumber));
-
-                bankAccount.AccountNumber += number;
+                accountNumber += ParseNumberFromOcr(ocrNumber, bankAccountsOcr.IndexOf(bankAccountOcr), ocrNumbers.IndexOf(ocrNumber));
             }
+
+            bankAccount.AccountNumber = accountNumber;
 
             bankAccounts.Add(bankAccount);
         }

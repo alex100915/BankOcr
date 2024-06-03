@@ -1,7 +1,7 @@
 using BankOcr.Exceptions;
 using BankOcr.Models;
 
-namespace BankOcr.Tests
+namespace BankOcr.Tests.Services
 {
     [TestFixture]
     public class BankAccountParserTests

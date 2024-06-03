@@ -1,7 +1,7 @@
 ﻿using BankOcr.Exceptions;
 using BankOcr.Services;
 
-namespace BankOcr.Tests
+namespace BankOcr.Tests.Services
 {
     [TestFixture]
     public class OcrBankAccountReaderTests
@@ -63,7 +63,7 @@ namespace BankOcr.Tests
                 "  | _| _||_||_ |_   ||_||_|",
                 "  ||_  _|  | _||_|  ||_| _|",
                 "bonjour",// not empty line
-                " _  _  _  _  _  _  _  _  _ ", 
+                " _  _  _  _  _  _  _  _  _ ",
                 "| || || || || || || || || |",
                 "|_||_||_||_||_||_||_||_||_|",
                 ""  // Empty line after second account

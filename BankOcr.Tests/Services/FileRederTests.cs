@@ -1,6 +1,6 @@
 ﻿using BankOcr.Services;
 
-namespace BankOcr.Tests
+namespace BankOcr.Tests.Services
 {
     [TestFixture]
     public class FileReaderTests
