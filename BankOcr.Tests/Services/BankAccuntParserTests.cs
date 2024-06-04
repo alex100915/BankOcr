@@ -87,15 +87,18 @@ namespace BankOcr.Tests.Services
         public void ValidateOcrBankAccount_InvalidLineLength_ThrowsBankAccountLengthException()
         {
             // Arrange
-            var ocrBankAccount = new OcrBankAccount
+            var ocrBankAccounts = new List<OcrBankAccount>
             {
-                Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
-                Line2 = "  | _| _||_||_ |_   ||_||_|",
-                Line3 = "  ||_  _|  | _||_|  ||_| _|"
+                new OcrBankAccount
+                {
+                    Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
+                    Line2 = "  | _| _||_||_ |_   ||_||_|",
+                    Line3 = "  ||_  _|  | _||_|  ||_| _|"
+                }
             };
 
             // Act & Assert
-            var ex = Assert.Throws<BankAccountLengthException>(() => _parser.GetOcrNumbers(ocrBankAccount));
+            var ex = Assert.Throws<BankAccountLengthException>(() => _parser.ParseFromOcr(ocrBankAccounts));
             Assert.That(ex.Message, Is.EqualTo("Each line in input file should have exactly 27 characters"));
         }
     }

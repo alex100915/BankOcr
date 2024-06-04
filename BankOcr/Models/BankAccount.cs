@@ -31,7 +31,9 @@ namespace BankOcr.Models
             }
         }
 
-        public bool IsValidChecksum(string accountNumber)
+        public bool HasProblem() => !string.IsNullOrEmpty(Status);
+
+        private bool IsValidChecksum(string accountNumber)
         {
             if (accountNumber.Length != BankAccountSettings.Length || !accountNumber.All(char.IsDigit))
             {
@@ -53,7 +55,7 @@ namespace BankOcr.Models
             return checkSum % BankAccountSettings.Checksum == 0;
         }
 
-        public string CheckStatus(string accountNumber)
+        private string CheckStatus(string accountNumber)
         {            
             if (accountNumber.Contains(OcrNumbers.Unknown))
                 return BankAccountStatus.Illegible;
@@ -74,7 +76,5 @@ namespace BankOcr.Models
 
             return string.Join(" ", AccountNumber, Status);
         }
-
-        public bool HasProblem() => !string.IsNullOrEmpty(Status);
     }
 }
