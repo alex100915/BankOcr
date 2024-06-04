@@ -5,16 +5,16 @@ namespace BankOcr.Models
 {
     public class BankAccount
     {
-        public BankAccount(string accountNumber)
-        {
-            AccountNumber = accountNumber;
-        }
-
         public string AccountNumber { get; private set; }
 
         public string Status { get; set; }
 
         public IEnumerable<string> AmbiguousAccountNumbers { get; set; }
+
+        public BankAccount(string accountNumber)
+        {
+            AccountNumber = accountNumber;
+        }
 
         public bool IsValid() => 
             !(AccountNumber.Contains(OcrNumbers.Unknown) || !(IsValidChecksum(AccountNumber)));
@@ -22,6 +22,16 @@ namespace BankOcr.Models
         public bool IsEligibleForCorrection() =>
             AccountNumber.Count(c => c == char.Parse(OcrNumbers.Unknown)) <= 1;
 
+        public override string ToString()
+        {
+            if (string.IsNullOrEmpty(Status))
+                return AccountNumber;
+
+            if (Status == BankAccountStatus.Ambiguous)
+                return string.Join(" ", AccountNumber, Status, JsonConvert.SerializeObject(AmbiguousAccountNumbers));
+
+            return string.Join(" ", AccountNumber, Status);
+        }
 
         private bool IsValidChecksum(string accountNumber)
         {
@@ -41,17 +51,6 @@ namespace BankOcr.Models
             }
 
             return checkSum % BankAccountSettings.Checksum == 0;
-        }
-
-        public override string ToString()
-        {
-            if (string.IsNullOrEmpty(Status))
-                return AccountNumber;
-
-            if (Status == BankAccountStatus.Ambiguous)
-                return string.Join(" ", AccountNumber, Status, JsonConvert.SerializeObject(AmbiguousAccountNumbers));
-
-            return string.Join(" ", AccountNumber, Status);
         }
     }
 }
