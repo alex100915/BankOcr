@@ -22,7 +22,7 @@
             " _|" +
             " _|";
 
-        public const string Four =
+        const string Four =
             "   " +
             "|_|" +
             "  |";
