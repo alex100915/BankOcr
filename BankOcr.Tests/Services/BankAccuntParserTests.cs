@@ -1,4 +1,3 @@
-using BankOcr.Constants;
 using BankOcr.Exceptions;
 using BankOcr.Models;
 
@@ -50,7 +49,7 @@ namespace BankOcr.Tests.Services
         }
 
         [Test]
-        public void ParseFromOcr_UnrecognizableOcrNumber_ThrowsParsingNumberException()
+        public void ParseFromOcr_UnrecognizableOcrNumber_ReportsIllegibleAccount()
         {
             // Arrange
             var ocrBankAccounts = new List<OcrBankAccount>
@@ -59,33 +58,29 @@ namespace BankOcr.Tests.Services
                 {
                     Line1 = "    _  _     _  _  _  _  _ ",
                     Line2 = "  | _| _||_||_ |_   ||_||_|",
-                    Line3 = "  ||_  _|  | _||_|  ||_||_ "  // Last digit is not a recognizable OCR number
+                    Line3 = "  ||_  _|  | _||_|  ||_||_ "  // Last digit is not a recognizable OCR number even after correction
                 }
             };
 
             // Act & Assert
-            Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().AccountNumber, Does.Contain("?"));
+            Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().ToString(), Does.Contain("ILL"));
         }
 
         [Test]
         public void GetOcrNumbers_ValidInput_ReturnsOcrNumbers()
         {
             // Arrange
-            var ocrBankAccount = new OcrBankAccount
+            var ocrBankAccounts = new List<OcrBankAccount>
             {
-                Line1 = "    _  _     _  _  _  _  _ ",
-                Line2 = "  | _| _||_||_ |_   ||_||_|",
-                Line3 = "  ||_  _|  | _||_|  ||_| _|"
+                new OcrBankAccount
+                {
+                    Line1 = " _  _  _  _  _  _  _  _  _ ",
+                    Line2 = "|_||_||_||_||_||_||_||_||_|",
+                    Line3 = " _| _| _| _| _| _| _| _| _|"
+                }
             };
-
-            // Act
-            var ocrNumbers = _parser.GetOcrNumbers(ocrBankAccount);
-
-            // Assert
-            Assert.That(ocrNumbers.Count, Is.EqualTo(9));
-            Assert.That(ocrNumbers[0], Is.EqualTo("     |  |"));
-            Assert.That(ocrNumbers[1], Is.EqualTo(" _  _||_ "));
-            Assert.That(ocrNumbers[8], Is.EqualTo(" _ |_| _|"));
+            
+            Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().ToString(), Is.EqualTo("999999999 AMB [\"899999999\",\"993999999\",\"999959999\"]"));
         }
 
         [Test]

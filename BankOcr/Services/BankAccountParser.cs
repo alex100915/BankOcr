@@ -30,6 +30,8 @@ public class BankAccountParser
 
                 if (correctedBankAccount.Count() == 1)
                     bankAccount = correctedBankAccount[0];
+                else if (correctedBankAccount.Count() == 0)
+                    bankAccount.Status = BankAccountStatus.Illegible;
                 else
                     bankAccount.Ambiguity = JsonConvert.SerializeObject(correctedBankAccount.Select(b => b.AccountNumber));
             }
