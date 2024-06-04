@@ -13,14 +13,11 @@ public class BankAccountParser : IBankAccountParser
         {
             var ocrNumbers = GetOcrNumbers(bankAccountOcr);
 
-            BankAccount bankAccount = new BankAccount
-            {
-                AccountNumber = string.Concat(ocrNumbers.Select(ParseOcrNumber))
-            };
+            BankAccount bankAccount = new BankAccount(string.Concat(ocrNumbers.Select(ParseOcrNumber)));
 
             if (!bankAccount.IsValid())
             {
-                if (!IsEligibleForCorrection(bankAccount))
+                if (!bankAccount.IsEligibleForCorrection())
                     bankAccount.Status = BankAccountStatus.Illegible;
                 else
                     bankAccount = CorrectAccountNumber(ocrNumbers, bankAccount);
@@ -65,29 +62,25 @@ public class BankAccountParser : IBankAccountParser
         return OcrNumbers.OcrNumbersDictionary.TryGetValue(ocrNumber, out var number)
             ? number.ToString()
             : OcrNumbers.Unknown;
-    }
-
-    private bool IsEligibleForCorrection(BankAccount bankAccount) =>
-        bankAccount.AccountNumber.Count(c => c == char.Parse(OcrNumbers.Unknown)) <= 1;
-
+    }    
 
     private BankAccount CorrectAccountNumber(List<string> ocrNumbers, BankAccount bankAccount)
     {
         List<BankAccount> correctedBankAccount = GetCorrectedBankAccount(ocrNumbers);
 
-        if (correctedBankAccount.Count() == 1)
+        if (correctedBankAccount.Count() == 0)
+        {
+            bankAccount.Status = BankAccountStatus.Illegible;
+        }
+        else if (correctedBankAccount.Count() == 1)
         {
             bankAccount.Status = BankAccountStatus.Valid;
             bankAccount = correctedBankAccount[0];
         }
-        else if (correctedBankAccount.Count() == 0)
-        {
-            bankAccount.Status = BankAccountStatus.Illegible;
-        }
         else
         {
             bankAccount.Status = BankAccountStatus.Ambiguous;
-            bankAccount.Ambiguity = JsonConvert.SerializeObject(correctedBankAccount.Select(b => b.AccountNumber));
+            bankAccount.AmbiguousAccountNumbers = correctedBankAccount.Select(b => b.AccountNumber);
         }
 
         return bankAccount;
@@ -120,13 +113,10 @@ public class BankAccountParser : IBankAccountParser
                         if (ParseOcrNumber(correctedNumber) == OcrNumbers.Unknown)
                             continue;
 
-                        var correctedNumbers = ocrNumbers.ToList();
-                        correctedNumbers[ocrNumberIndex] = correctedNumber;
+                        var correctedOcrNumbers = ocrNumbers.ToList();
+                        correctedOcrNumbers[ocrNumberIndex] = correctedNumber;
 
-                        BankAccount bankAccount = new BankAccount()
-                        {
-                            AccountNumber = string.Concat(correctedNumbers.Select(ParseOcrNumber))
-                        };
+                        BankAccount bankAccount = new BankAccount(string.Concat(correctedOcrNumbers.Select(ParseOcrNumber)));
 
                         if (bankAccount.IsValid())
                             correctedBankAccounts.Add(bankAccount);

@@ -1,29 +1,32 @@
 ﻿using BankOcr.Constants;
+using Newtonsoft.Json;
 
 namespace BankOcr.Models
 {
     public class BankAccount
     {
-        public string AccountNumber { get; set; }
-
-        public string Status { get;  set; }
-
-        public string Ambiguity { get; set; }
-
-        public bool IsValid()
+        public BankAccount(string accountNumber)
         {
-            if (AccountNumber.Contains(OcrNumbers.Unknown) || !(IsValidChecksum(AccountNumber)))
-                return false;
-
-            return true;
+            AccountNumber = accountNumber;
         }
+
+        public string AccountNumber { get; private set; }
+
+        public string Status { get; set; }
+
+        public IEnumerable<string> AmbiguousAccountNumbers { get; set; }
+
+        public bool IsValid() => 
+            !(AccountNumber.Contains(OcrNumbers.Unknown) || !(IsValidChecksum(AccountNumber)));
+
+        public bool IsEligibleForCorrection() =>
+            AccountNumber.Count(c => c == char.Parse(OcrNumbers.Unknown)) <= 1;
+
 
         private bool IsValidChecksum(string accountNumber)
         {
             if (accountNumber.Length != BankAccountSettings.Length || !accountNumber.All(char.IsDigit))
-            {
                 return false;
-            }
 
             var bankAccountNumbers = accountNumber
                 .ToCharArray()
@@ -46,7 +49,7 @@ namespace BankOcr.Models
                 return AccountNumber;
 
             if (Status == BankAccountStatus.Ambiguous)
-                return string.Join(" ", AccountNumber, Status, Ambiguity);
+                return string.Join(" ", AccountNumber, Status, JsonConvert.SerializeObject(AmbiguousAccountNumbers));
 
             return string.Join(" ", AccountNumber, Status);
         }
