@@ -3,6 +3,7 @@
     public class BankAccountStatus
     {
         public const string Illegible = "ILL";
-        public const string CheksumInvalid = "ERR";
+        public const string ChecksumInvalid = "ERR";
+        public const string Ambiguous = "AMB";
     }
 }

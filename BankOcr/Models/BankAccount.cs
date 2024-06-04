@@ -5,10 +5,12 @@ namespace BankOcr.Models
     public class BankAccount
     {
         private string _accountNumber;
+        private string ambiguity;
 
         public string AccountNumber
         {
             get => _accountNumber;
+
             set
             {
                 _accountNumber = value;
@@ -16,9 +18,20 @@ namespace BankOcr.Models
             }
         }
 
-        public string Status { get; private set; }
+        public string Status { get;  set; }
 
-        private bool IsValidChecksum(string accountNumber)
+        public string Ambiguity
+        {
+            get => ambiguity;
+            
+            set
+            {
+                ambiguity = value;
+                Status = BankAccountStatus.Ambiguous;
+            }
+        }
+
+        public bool IsValidChecksum(string accountNumber)
         {
             if (accountNumber.Length != BankAccountSettings.Length || !accountNumber.All(char.IsDigit))
             {
@@ -40,20 +53,28 @@ namespace BankOcr.Models
             return checkSum % BankAccountSettings.Checksum == 0;
         }
 
-        private string CheckStatus(string accountNumber)
+        public string CheckStatus(string accountNumber)
         {            
             if (accountNumber.Contains("?"))
                 return BankAccountStatus.Illegible;
 
             if (!IsValidChecksum(accountNumber))
-                return BankAccountStatus.CheksumInvalid;
+                return BankAccountStatus.ChecksumInvalid;
 
             return string.Empty;
         }
 
         public override string ToString()
         {
-            return string.IsNullOrEmpty(Status) ? AccountNumber : string.Join(" ", AccountNumber, Status);
+            if (string.IsNullOrEmpty(Status))
+                return AccountNumber;
+
+            if (Status == BankAccountStatus.Ambiguous)
+                return string.Join(" ", AccountNumber, Status, Ambiguity);
+
+            return string.Join(" ", AccountNumber, Status);
         }
+
+        public bool HasProblem() => !string.IsNullOrEmpty(Status);
     }
 }

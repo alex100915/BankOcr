@@ -1,9 +1,9 @@
 ﻿using BankOcr.Exceptions;
 using BankOcr.Constants;
 using BankOcr.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Newtonsoft.Json;
 
-public class BankAccountParser
+public class BankAccountParser 
 {
     public List<BankAccount> ParseFromOcr(List<OcrBankAccount> bankAccountsOcr)
     {
@@ -11,18 +11,30 @@ public class BankAccountParser
 
         foreach (var bankAccountOcr in bankAccountsOcr)
         {
-            BankAccount bankAccount = new BankAccount();
-
             var ocrNumbers = GetOcrNumbers(bankAccountOcr);
-            
-            string accountNumber = string.Empty;
 
-            foreach (var ocrNumber in ocrNumbers)
+            BankAccount bankAccount = new BankAccount
             {
-                accountNumber += ParseNumberFromOcr(ocrNumber);
-            }
+                AccountNumber = string.Concat(ocrNumbers.Select(ParseOcrNumber))
+            };
 
-            bankAccount.AccountNumber = accountNumber;
+            if (bankAccount.HasProblem())
+            {
+                if (!IsEligibleForCorrection(bankAccount))
+                {
+                    bankAccounts.Add(bankAccount);
+                    continue;
+                }
+
+                List<BankAccount> correctedBankAccount = GetCorrectedBankAccount(ocrNumbers);
+
+                if (correctedBankAccount.Count() == 1)
+                    bankAccount = correctedBankAccount[0];
+                else if (correctedBankAccount.Count() == 0)
+                    bankAccount.Status = BankAccountStatus.Illegible;
+                else
+                    bankAccount.Ambiguity = JsonConvert.SerializeObject(correctedBankAccount.Select(b => b.AccountNumber));
+            }
 
             bankAccounts.Add(bankAccount);
         }
@@ -59,10 +71,58 @@ public class BankAccountParser
         }
     }
 
-    private string ParseNumberFromOcr(string ocrNumber)
+    private string ParseOcrNumber(string ocrNumber)
     {
-        var number = OcrNumbers.OcrNumbersDictionary.FirstOrDefault(n => n.Key == ocrNumber);
+        return OcrNumbers.OcrNumbersDictionary.TryGetValue(ocrNumber, out var number)
+            ? number.ToString()
+            : OcrNumbers.Unknown;
+    }
 
-        return number.Key == null ? "?" : number.Value.ToString();
+    private bool IsEligibleForCorrection(BankAccount bankAccount) =>
+        bankAccount.AccountNumber.Count(c => c == char.Parse(OcrNumbers.Unknown)) <= 1;
+
+    private List<BankAccount> GetCorrectedBankAccount(List<string> ocrNumbers)
+    {
+        var replacements = new List<Tuple<char, char>>
+        {
+            new Tuple<char, char>(' ', '|'),
+            new Tuple<char, char>(' ', '_'),
+            new Tuple<char, char>('|', ' '),
+            new Tuple<char, char>('_', ' ')
+        };
+
+        List<BankAccount> correctedBankAccounts = new List<BankAccount>();
+
+        foreach (var replacement in replacements)
+        {
+            for (int ocrNumberIndex = 0; ocrNumberIndex < ocrNumbers.Count; ocrNumberIndex++)
+            {
+                var ocrNumber = ocrNumbers[ocrNumberIndex];
+
+                for (int charIndex = 0; charIndex < ocrNumber.Length; charIndex++)
+                {
+                    if (ocrNumber[charIndex] == replacement.Item1)
+                    {
+                        string correctedNumber = ocrNumber.Substring(0, charIndex) + replacement.Item2 + ocrNumber.Substring(charIndex + 1);
+
+                        if (ParseOcrNumber(correctedNumber) == OcrNumbers.Unknown)
+                            continue;
+
+                        var correctedNumbers = ocrNumbers.ToList();
+                        correctedNumbers[ocrNumberIndex] = correctedNumber;
+
+                        BankAccount bankAccount = new BankAccount()
+                        {
+                            AccountNumber = string.Concat(correctedNumbers.Select(ParseOcrNumber))
+                        };
+
+                        if (!bankAccount.HasProblem())
+                            correctedBankAccounts.Add(bankAccount);
+                    }
+                }
+            }
+        }
+
+        return correctedBankAccounts;
     }
 }

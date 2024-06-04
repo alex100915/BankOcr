@@ -33,7 +33,7 @@ namespace BankOcr.Tests
 
             // Assert
             Assert.That(account.AccountNumber, Is.EqualTo(invalidAccountNumber));
-            Assert.That(account.Status, Is.EqualTo(BankAccountStatus.CheksumInvalid));
+            Assert.That(account.Status, Is.EqualTo(BankAccountStatus.ChecksumInvalid));
         }
 
         [Test]
@@ -65,6 +65,23 @@ namespace BankOcr.Tests
 
             // Assert
             Assert.That(output, Is.EqualTo(expectedOutput));
+        }
+
+        [Test]
+        public void ToString_AmbiguousAccountNumber_ReturnsAccountNumberWithStatusAndAmbiguity()
+        {
+            // Arrange
+            var bankAccount = new BankAccount
+            {
+                AccountNumber = "123456789",
+                Ambiguity = @"[""123456780"", ""123456781""]"
+            };
+
+            // Act
+            var result = bankAccount.ToString();
+
+            // Assert
+            Assert.That(result, Is.EqualTo(@"123456789 AMB [""123456780"", ""123456781""]"));
         }
     }
 }
