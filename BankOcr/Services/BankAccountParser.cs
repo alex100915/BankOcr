@@ -40,7 +40,6 @@ public class BankAccountParser : IBankAccountParser
         }
 
         return bankAccounts;
-
     }
 
     private List<string> GetOcrNumbers(OcrBankAccount bankAccountOcr)
