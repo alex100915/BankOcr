@@ -18,28 +18,38 @@ public class BankAccountParser : IBankAccountParser
                 AccountNumber = string.Concat(ocrNumbers.Select(ParseOcrNumber))
             };
 
-            if (bankAccount.HasProblem())
+            if (!bankAccount.IsValid())
             {
                 if (!IsEligibleForCorrection(bankAccount))
                 {
-                    bankAccounts.Add(bankAccount);
+                    bankAccount.Status = BankAccountStatus.Illegible;                    
+                    bankAccounts.Add(bankAccount);                    
                     continue;
                 }
 
                 List<BankAccount> correctedBankAccount = GetCorrectedBankAccount(ocrNumbers);
 
                 if (correctedBankAccount.Count() == 1)
+                {
+                    bankAccount.Status = BankAccountStatus.Valid;
                     bankAccount = correctedBankAccount[0];
+                }
                 else if (correctedBankAccount.Count() == 0)
+                {
                     bankAccount.Status = BankAccountStatus.Illegible;
+                }
                 else
+                {
+                    bankAccount.Status = BankAccountStatus.Ambiguous;
                     bankAccount.Ambiguity = JsonConvert.SerializeObject(correctedBankAccount.Select(b => b.AccountNumber));
+                }
             }
 
             bankAccounts.Add(bankAccount);
         }
 
         return bankAccounts;
+
     }
 
     private List<string> GetOcrNumbers(OcrBankAccount bankAccountOcr)
@@ -115,7 +125,7 @@ public class BankAccountParser : IBankAccountParser
                             AccountNumber = string.Concat(correctedNumbers.Select(ParseOcrNumber))
                         };
 
-                        if (!bankAccount.HasProblem())
+                        if (bankAccount.IsValid())
                             correctedBankAccounts.Add(bankAccount);
                     }
                 }
