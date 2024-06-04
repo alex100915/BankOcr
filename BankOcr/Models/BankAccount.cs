@@ -55,7 +55,7 @@ namespace BankOcr.Models
 
         public string CheckStatus(string accountNumber)
         {            
-            if (accountNumber.Contains("?"))
+            if (accountNumber.Contains(OcrNumbers.Unknown))
                 return BankAccountStatus.Illegible;
 
             if (!IsValidChecksum(accountNumber))
