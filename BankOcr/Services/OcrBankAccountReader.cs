@@ -4,7 +4,7 @@ using BankOcr.Models;
 
 namespace BankOcr.Services
 {
-    public class OcrBankAccountReader
+    public class OcrBankAccountReader : IOcrBankAccountReader
     {
         public List<OcrBankAccount> Read(List<string> fileLines)
         {
