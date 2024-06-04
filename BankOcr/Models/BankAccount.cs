@@ -18,7 +18,7 @@ namespace BankOcr.Models
             return true;
         }
 
-        private static bool IsValidChecksum(string accountNumber)
+        private bool IsValidChecksum(string accountNumber)
         {
             if (accountNumber.Length != BankAccountSettings.Length || !accountNumber.All(char.IsDigit))
             {
