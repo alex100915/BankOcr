@@ -64,7 +64,7 @@ namespace BankOcr.Tests.Services
             };
 
             // Act & Assert
-            Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().AccountNumber, Does.Contain("?"));
+            Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().AccountNumber, Does.Contain(OcrNumbers.Unknown));
         }
 
         [Test]

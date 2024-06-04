@@ -1,7 +1,6 @@
 ﻿using BankOcr.Exceptions;
 using BankOcr.Constants;
 using BankOcr.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class BankAccountParser
 {
@@ -63,6 +62,6 @@ public class BankAccountParser
     {
         var number = OcrNumbers.OcrNumbersDictionary.FirstOrDefault(n => n.Key == ocrNumber);
 
-        return number.Key == null ? "?" : number.Value.ToString();
+        return number.Key == null ? OcrNumbers.Unknown : number.Value.ToString();
     }
 }

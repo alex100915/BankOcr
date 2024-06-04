@@ -22,7 +22,7 @@
             " _|" +
             " _|";
 
-        public const string Four =
+        const string Four =
             "   " +
             "|_|" +
             "  |";
@@ -51,6 +51,8 @@
             " _ " +
             "|_|" +
             " _|";
+
+        public const string Unknown = "?";
 
         public static Dictionary<string, int> OcrNumbersDictionary = new Dictionary<string, int>
         {
