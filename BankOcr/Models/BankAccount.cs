@@ -4,36 +4,21 @@ namespace BankOcr.Models
 {
     public class BankAccount
     {
-        private string _accountNumber;
-        private string ambiguity;
-
-        public string AccountNumber
-        {
-            get => _accountNumber;
-
-            set
-            {
-                _accountNumber = value;
-                Status = CheckStatus(_accountNumber);
-            }
-        }
+        public string AccountNumber { get; set; }
 
         public string Status { get;  set; }
 
-        public string Ambiguity
+        public string Ambiguity { get; set; }
+
+        public bool IsValid()
         {
-            get => ambiguity;
-            
-            set
-            {
-                ambiguity = value;
-                Status = BankAccountStatus.Ambiguous;
-            }
+            if (AccountNumber.Contains(OcrNumbers.Unknown) || !(IsValidChecksum(AccountNumber)))
+                return false;
+
+            return true;
         }
 
-        public bool HasProblem() => !string.IsNullOrEmpty(Status);
-
-        private bool IsValidChecksum(string accountNumber)
+        private static bool IsValidChecksum(string accountNumber)
         {
             if (accountNumber.Length != BankAccountSettings.Length || !accountNumber.All(char.IsDigit))
             {
@@ -53,17 +38,6 @@ namespace BankOcr.Models
             }
 
             return checkSum % BankAccountSettings.Checksum == 0;
-        }
-
-        private string CheckStatus(string accountNumber)
-        {            
-            if (accountNumber.Contains(OcrNumbers.Unknown))
-                return BankAccountStatus.Illegible;
-
-            if (!IsValidChecksum(accountNumber))
-                return BankAccountStatus.ChecksumInvalid;
-
-            return string.Empty;
         }
 
         public override string ToString()
