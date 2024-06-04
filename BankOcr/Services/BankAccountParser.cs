@@ -2,7 +2,7 @@
 using BankOcr.Constants;
 using BankOcr.Models;
 
-public class BankAccountParser
+public class BankAccountParser : IBankAccountParser
 {
     public List<BankAccount> ParseFromOcr(List<OcrBankAccount> bankAccountsOcr)
     {
@@ -28,7 +28,7 @@ public class BankAccountParser
 
     }
 
-    public List<string> GetOcrNumbers(OcrBankAccount bankAccountOcr)
+    private List<string> GetOcrNumbers(OcrBankAccount bankAccountOcr)
     {
         ValidateOcrBankAccount(bankAccountOcr);
 
