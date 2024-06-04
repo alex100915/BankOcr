@@ -1,7 +1,6 @@
 ﻿using BankOcr.Exceptions;
 using BankOcr.Constants;
 using BankOcr.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class BankAccountParser
 {
