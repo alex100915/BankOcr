@@ -1,6 +1,6 @@
 ﻿namespace BankOcr.Services
 {
-    public class FileReader
+    public class FileReader : IFileReader
     {
         public List<string> ReadFile(string path)
         {
