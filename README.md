@@ -3,7 +3,8 @@
 ## Overview
 
 Project content: https://code.joejag.com/coding-dojo/bank-ocr/
-Each feature branch contains listed User Stories from the instructions 
+
+Each feature branch contains the listed User Stories from the instructions 
 
 ## Table of Contents
 
