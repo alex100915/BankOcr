@@ -21,35 +21,15 @@ public class BankAccountParser : IBankAccountParser
             if (!bankAccount.IsValid())
             {
                 if (!IsEligibleForCorrection(bankAccount))
-                {
-                    bankAccount.Status = BankAccountStatus.Illegible;                    
-                    bankAccounts.Add(bankAccount);                    
-                    continue;
-                }
-
-                List<BankAccount> correctedBankAccount = GetCorrectedBankAccount(ocrNumbers);
-
-                if (correctedBankAccount.Count() == 1)
-                {
-                    bankAccount.Status = BankAccountStatus.Valid;
-                    bankAccount = correctedBankAccount[0];
-                }
-                else if (correctedBankAccount.Count() == 0)
-                {
                     bankAccount.Status = BankAccountStatus.Illegible;
-                }
                 else
-                {
-                    bankAccount.Status = BankAccountStatus.Ambiguous;
-                    bankAccount.Ambiguity = JsonConvert.SerializeObject(correctedBankAccount.Select(b => b.AccountNumber));
-                }
+                    bankAccount = CorrectAccountNumber(ocrNumbers, bankAccount);
             }
 
             bankAccounts.Add(bankAccount);
         }
 
         return bankAccounts;
-
     }
 
     private List<string> GetOcrNumbers(OcrBankAccount bankAccountOcr)
@@ -89,6 +69,29 @@ public class BankAccountParser : IBankAccountParser
 
     private bool IsEligibleForCorrection(BankAccount bankAccount) =>
         bankAccount.AccountNumber.Count(c => c == char.Parse(OcrNumbers.Unknown)) <= 1;
+
+
+    private BankAccount CorrectAccountNumber(List<string> ocrNumbers, BankAccount bankAccount)
+    {
+        List<BankAccount> correctedBankAccount = GetCorrectedBankAccount(ocrNumbers);
+
+        if (correctedBankAccount.Count() == 1)
+        {
+            bankAccount.Status = BankAccountStatus.Valid;
+            bankAccount = correctedBankAccount[0];
+        }
+        else if (correctedBankAccount.Count() == 0)
+        {
+            bankAccount.Status = BankAccountStatus.Illegible;
+        }
+        else
+        {
+            bankAccount.Status = BankAccountStatus.Ambiguous;
+            bankAccount.Ambiguity = JsonConvert.SerializeObject(correctedBankAccount.Select(b => b.AccountNumber));
+        }
+
+        return bankAccount;
+    }
 
     private List<BankAccount> GetCorrectedBankAccount(List<string> ocrNumbers)
     {
