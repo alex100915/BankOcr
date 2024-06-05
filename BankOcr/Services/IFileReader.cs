@@ -2,6 +2,6 @@
 {
     public interface IFileReader
     {
-        List<string> ReadFile(string path);
+        Task<List<string>> ReadFileAsync(string path);
     }
 }
