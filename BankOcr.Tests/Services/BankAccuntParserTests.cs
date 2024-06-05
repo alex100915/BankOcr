@@ -1,5 +1,4 @@
 using BankOcr.Constants;
-using BankOcr.Exceptions;
 using BankOcr.Models;
 
 namespace BankOcr.Tests.Services
@@ -32,25 +31,7 @@ namespace BankOcr.Tests.Services
         }
 
         [Test]
-        public void ParseFromOcr_InvalidLineLength_ThrowsBankAccountLengthException()
-        {
-            // Arrange
-            var ocrBankAccounts = new List<OcrBankAccount>
-            {
-                new OcrBankAccount
-                {
-                    Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
-                    Line2 = "  | _| _||_||_ |_   ||_||_|",
-                    Line3 = "  ||_  _|  | _||_|  ||_| _|"
-                }
-            };
-
-            // Act & Assert
-            Assert.Throws<BankAccountLengthException>(() => _parser.ParseFromOcr(ocrBankAccounts));
-        }
-
-        [Test]
-        public void ParseFromOcr_UnrecognizableOcrNumber_ThrowsParsingNumberException()
+        public void ParseFromOcr_UnrecognizableOcrNumber_ContainsUnknownCharacterMarksNumberAsIllegible()
         {
             // Arrange
             var ocrBankAccounts = new List<OcrBankAccount>
@@ -63,12 +44,15 @@ namespace BankOcr.Tests.Services
                 }
             };
 
+            var bankAccount = _parser.ParseFromOcr(ocrBankAccounts);
+
             // Act & Assert
-            Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().AccountNumber, Does.Contain(OcrNumbers.Unknown));
+            Assert.That(bankAccount.First().ToString(), Does.Contain(OcrNumbers.Unknown));
+            Assert.That(bankAccount.First().ToString(), Does.Contain(BankAccountStatus.Illegible));
         }
 
         [Test]
-        public void GetOcrNumbers_ValidInput_ReturnsOcrNumbers()
+        public void ParseFromOcr_InvalidChecksum_ReturnsOcrNumbersWithMarkedERR()
         {
             // Arrange
             // Arrange
@@ -77,7 +61,7 @@ namespace BankOcr.Tests.Services
                 new OcrBankAccount
                 {
                     Line1 = "    _  _     _  _  _  _  _ ",
-                    Line2 = "  | _| _||_||_ |_   ||_||_|",
+                    Line2 = "  | _| _|  ||_ |_   ||_||_|",
                     Line3 = "  ||_  _|  | _||_|  ||_| _|"
                 }
             };
@@ -86,26 +70,7 @@ namespace BankOcr.Tests.Services
             var ocrNumbers = _parser.ParseFromOcr(ocrBankAccounts);
 
             // Assert
-            Assert.That(ocrNumbers.First().AccountNumber.Count(), Is.EqualTo(9));
-        }
-
-        [Test]
-        public void ValidateOcrBankAccount_InvalidLineLength_ThrowsBankAccountLengthException()
-        {
-            // Arrange
-            var ocrBankAccounts = new List<OcrBankAccount>
-            {
-                new OcrBankAccount
-                {
-                    Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
-                    Line2 = "  | _| _||_||_ |_   ||_||_|",
-                    Line3 = "  ||_  _|  | _||_|  ||_| _|"
-                }
-            };
-
-            // Act & Assert
-            var ex = Assert.Throws<BankAccountLengthException>(() => _parser.ParseFromOcr(ocrBankAccounts));
-            Assert.That(ex.Message, Is.EqualTo("Each line in input file should have exactly 27 characters"));
+            Assert.That(ocrNumbers.First().ToString(), Does.Contain(BankAccountStatus.CheksumInvalid));
         }
     }
 }
