@@ -4,8 +4,8 @@
     {
         public const int DigitLength = 3;
 
-        public const int BankAccountLength = 27;
+        public const int LineLength = 27;
 
-        public const int BankAccountHeight = 4;
+        public const int LineHeight = 4;
     }
 }
