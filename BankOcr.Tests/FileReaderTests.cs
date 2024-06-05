@@ -1,6 +1,6 @@
 ﻿using BankOcr.Services;
 
-namespace BankOcr.Tests
+namespace BankOcr.Tests.Services
 {
     [TestFixture]
     public class FileReaderTests
@@ -14,7 +14,7 @@ namespace BankOcr.Tests
         }
 
         [Test]
-        public void ReadFile_FileExists_ReturnsFileLines()
+        public async Task ReadFileAsync_FileExists_ReturnsFileLines()
         {
             // Arrange
             string path = "validFilePath.txt";
@@ -22,7 +22,7 @@ namespace BankOcr.Tests
             File.WriteAllText(path, fileContent);
 
             // Act
-            var result = _fileReader.ReadFile(path);
+            var result = await _fileReader.ReadFileAsync(path);
 
             // Assert
             Assert.That(result.Count, Is.EqualTo(3));
@@ -35,26 +35,26 @@ namespace BankOcr.Tests
         }
 
         [Test]
-        public void ReadFile_FileDoesNotExist_ThrowsFileNotFoundException()
+        public void ReadFileAsync_FileDoesNotExist_ThrowsFileNotFoundException()
         {
             // Arrange
             string path = "invalidFilePath.txt";
 
             // Act & Assert
-            var ex = Assert.Throws<FileNotFoundException>(() => _fileReader.ReadFile(path));
+            var ex = Assert.ThrowsAsync<FileNotFoundException>(async () => await _fileReader.ReadFileAsync(path));
             Assert.That(ex.Message, Does.Contain("Could not find file"));
         }
 
         [Test]
-        public void ReadFile_FileWithEmptyLines_ReturnsListIncludingEmptyLines()
+        public async Task ReadFileAsync_FileWithEmptyLines_ReturnsListIncludingEmptyLines()
         {
             // Arrange
             string path = "fileWithEmptyLines.txt";
             string fileContent = "line1\n\nline3\n";
-            File.WriteAllText(path, fileContent);
+            await File.WriteAllTextAsync(path, fileContent);
 
             // Act
-            var result = _fileReader.ReadFile(path);
+            var result = await _fileReader.ReadFileAsync(path);
 
             // Assert
             Assert.That(result.Count, Is.EqualTo(4));
