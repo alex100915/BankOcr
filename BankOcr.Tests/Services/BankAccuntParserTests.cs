@@ -31,24 +31,6 @@ namespace BankOcr.Tests.Services
         }
 
         [Test]
-        public void ParseFromOcr_InvalidLineLength_ThrowsBankAccountLengthException()
-        {
-            // Arrange
-            var ocrBankAccounts = new List<OcrBankAccount>
-            {
-                new OcrBankAccount
-                {
-                    Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
-                    Line2 = "  | _| _||_||_ |_   ||_||_|",
-                    Line3 = "  ||_  _|  | _||_|  ||_| _|"
-                }
-            };
-
-            // Act & Assert
-            Assert.Throws<BankAccountLengthException>(() => _parser.ParseFromOcr(ocrBankAccounts));
-        }
-
-        [Test]
         public void ParseFromOcr_UnrecognizableOcrNumber_ThrowsParsingNumberException()
         {
             // Arrange
@@ -67,22 +49,25 @@ namespace BankOcr.Tests.Services
         }
 
         [Test]
-        public void ValidateOcrBankAccount_InvalidLineLength_ThrowsBankAccountLengthException()
+        public void ParseFromOcr_InvalidChecksum_ReturnsOcrNumbersWithMarkedERR()
         {
+            // Arrange
             // Arrange
             var ocrBankAccounts = new List<OcrBankAccount>
             {
                 new OcrBankAccount
                 {
-                    Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
-                    Line2 = "  | _| _||_||_ |_   ||_||_|",
+                    Line1 = "    _  _     _  _  _  _  _ ",
+                    Line2 = "  | _| _|  ||_ |_   ||_||_|",
                     Line3 = "  ||_  _|  | _||_|  ||_| _|"
                 }
             };
 
-            // Act & Assert
-            var ex = Assert.Throws<BankAccountLengthException>(() => _parser.ParseFromOcr(ocrBankAccounts));
-            Assert.That(ex.Message, Is.EqualTo("Each line in input file should have exactly 27 characters"));
+            // Act
+            var ocrNumbers = _parser.ParseFromOcr(ocrBankAccounts);
+
+            // Assert
+            Assert.That(ocrNumbers.First().ValidChecksum, Is.EqualTo(false));
         }
     }
 }
