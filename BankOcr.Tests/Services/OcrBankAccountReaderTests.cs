@@ -73,5 +73,26 @@ namespace BankOcr.Tests.Services
             var ex = Assert.Throws<FileStructureException>(() => _reader.Read(fileLines));
             Assert.That(ex.Message, Is.EqualTo("Each bank account should be followed by an empty line"));
         }
+
+
+        [Test]
+        public void Read_InvalidLineLength_ThrowsBankAccountLengthException()
+        {
+            // Arrange
+            var fileLines = new List<string>
+            {
+                "    _  _     _  _  _  _  _", // 26 lines
+                "  | _| _||_||_ |_   ||_||_|",
+                "  ||_  _|  | _||_|  ||_| _|",
+                "",// not empty line
+                " _  _  _  _  _  _  _  _  _ ",
+                "| || || || || || || || || |",
+                "|_||_||_||_||_||_||_||_||_|",
+                ""  // Empty line after second account
+            };
+
+            // Act & Assert
+            Assert.Throws<OcrBankAccountLengthException>(() => _reader.Read(fileLines));
+        }
     }
 }

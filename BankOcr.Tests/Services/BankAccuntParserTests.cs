@@ -1,4 +1,3 @@
-using BankOcr.Exceptions;
 using BankOcr.Models;
 
 namespace BankOcr.Tests.Services
@@ -31,24 +30,6 @@ namespace BankOcr.Tests.Services
         }
 
         [Test]
-        public void ParseFromOcr_InvalidLineLength_ThrowsBankAccountLengthException()
-        {
-            // Arrange
-            var ocrBankAccounts = new List<OcrBankAccount>
-            {
-                new OcrBankAccount
-                {
-                    Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
-                    Line2 = "  | _| _||_||_ |_   ||_||_|",
-                    Line3 = "  ||_  _|  | _||_|  ||_| _|"
-                }
-            };
-
-            // Act & Assert
-            Assert.Throws<BankAccountLengthException>(() => _parser.ParseFromOcr(ocrBankAccounts));
-        }
-
-        [Test]
         public void ParseFromOcr_UnrecognizableOcrNumber_ReportsIllegibleAccount()
         {
             // Arrange
@@ -67,7 +48,28 @@ namespace BankOcr.Tests.Services
         }
 
         [Test]
-        public void GetOcrNumbers_ValidInput_ReturnsOcrNumbers()
+        public void ParseFromOcr_InputForCorrection_ReturnsCorrectedAccountNumber()
+        {
+            // Arrange
+            var ocrBankAccounts = new List<OcrBankAccount>
+            {
+                new OcrBankAccount
+                {
+                    Line1 = "    _  _     _  _  _  _  _ ",
+                    Line2 = "  | _| _||_||_ |_   ||_||_|",
+                    Line3 = "  ||_  _|  | _||_|  ||_|  |"  // Last digit is not a recognizable OCR number
+                }
+            };
+
+            var bankAccounts = _parser.ParseFromOcr(ocrBankAccounts);
+
+            // Assert
+            Assert.That(bankAccounts.Count, Is.EqualTo(1));
+            Assert.That(bankAccounts[0].AccountNumber, Is.EqualTo("123456789"));
+        }
+
+        [Test]
+        public void ParseFromOcr_InputForCorrectionAndAmbiguous_ReturnsAmbiguousAccountNumbers()
         {
             // Arrange
             var ocrBankAccounts = new List<OcrBankAccount>
@@ -81,25 +83,6 @@ namespace BankOcr.Tests.Services
             };
             
             Assert.That(_parser.ParseFromOcr(ocrBankAccounts).First().ToString(), Is.EqualTo("999999999 AMB [\"899999999\",\"993999999\",\"999959999\"]"));
-        }
-
-        [Test]
-        public void ValidateOcrBankAccount_InvalidLineLength_ThrowsBankAccountLengthException()
-        {
-            // Arrange
-            var ocrBankAccounts = new List<OcrBankAccount>
-            {
-                new OcrBankAccount
-                {
-                    Line1 = "    _  _     _  _  _  _  _",  // 26 characters instead of 27
-                    Line2 = "  | _| _||_||_ |_   ||_||_|",
-                    Line3 = "  ||_  _|  | _||_|  ||_| _|"
-                }
-            };
-
-            // Act & Assert
-            var ex = Assert.Throws<BankAccountLengthException>(() => _parser.ParseFromOcr(ocrBankAccounts));
-            Assert.That(ex.Message, Is.EqualTo("Each line in input file should have exactly 27 characters"));
         }
     }
 }
