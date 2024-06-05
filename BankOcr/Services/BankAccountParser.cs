@@ -30,11 +30,9 @@ public class BankAccountParser : IBankAccountParser
 
     private List<string> GetOcrNumbers(OcrBankAccount bankAccountOcr)
     {
-        ValidateOcrBankAccount(bankAccountOcr);
-
         var ocrNumbers = new List<string>();
 
-        for (int i = 0; i < OcrBankAccountSettings.BankAccountLength; i += OcrBankAccountSettings.DigitLength)
+        for (int i = 0; i < OcrBankAccountSettings.LineLength; i += OcrBankAccountSettings.DigitLength)
         {
             string ocrNumber = bankAccountOcr.Line1.Substring(i, OcrBankAccountSettings.DigitLength);
             ocrNumber += bankAccountOcr.Line2.Substring(i, OcrBankAccountSettings.DigitLength);
@@ -44,16 +42,6 @@ public class BankAccountParser : IBankAccountParser
         }
 
         return ocrNumbers;
-    }
-
-    private void ValidateOcrBankAccount(OcrBankAccount ocrBankAccount)
-    {
-        if (ocrBankAccount.Line1.Length != OcrBankAccountSettings.BankAccountLength
-            || ocrBankAccount.Line2.Length != OcrBankAccountSettings.BankAccountLength
-            || ocrBankAccount.Line3.Length != OcrBankAccountSettings.BankAccountLength)
-        {
-            throw new BankAccountLengthException($"Each line in input file should have exactly {OcrBankAccountSettings.BankAccountLength} characters");
-        }
     }
 
     private string ParseNumberFromOcr(string ocrNumber, int bankAccountNumber, int digitNumber)
