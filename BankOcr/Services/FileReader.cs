@@ -2,9 +2,9 @@
 {
     public class FileReader : IFileReader
     {
-        public List<string> ReadFile(string path)
+        public async Task<List<string>> ReadFileAsync(string path)
         {
-            var content = File.ReadAllText(path);
+            var content = await File.ReadAllTextAsync(path);
 
             return content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).ToList();
         }

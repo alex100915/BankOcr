@@ -4,7 +4,7 @@ using BankOcr.Services;
 string filePath = Path.Combine(Environment.CurrentDirectory, "Resources", "bankAccounts.txt");
 
 IFileReader fileReader = new FileReader();
-List<string> fileLines = fileReader.ReadFile(filePath);
+List<string> fileLines = await fileReader.ReadFileAsync(filePath);
 
 IOcrBankAccountReader ocrBankAccountsReader = new OcrBankAccountReader();
 List<OcrBankAccount> ocrBankAccounts = ocrBankAccountsReader.Read(fileLines);
